@@ -9,6 +9,7 @@ import com.tof.tracesoffamily.security.oauth2.OAuth2AuthenticationFailureHandler
 import com.tof.tracesoffamily.security.oauth2.OAuth2AuthenticationSuccessHandler;
 import com.tof.tracesoffamily.web.service.user.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -88,11 +89,16 @@ public class SecurityConfig {
                 .build();
     }
 
-    @Bean
+//    @Bean
+//    public void configure(AuthenticationManagerBuilder authenticationManagerBuilder) throws Exception {
+//        authenticationManagerBuilder
+//                .userDetailsService(customUserDetailsService)
+//                .passwordEncoder(passwordEncoder());
+//    }
+    @Autowired
     public void configure(AuthenticationManagerBuilder authenticationManagerBuilder) throws Exception {
         authenticationManagerBuilder
-                .userDetailsService(customUserDetailsService)
-                .passwordEncoder(passwordEncoder());
+                .userDetailsService(customUserDetailsService);
     }
 
     @Bean
