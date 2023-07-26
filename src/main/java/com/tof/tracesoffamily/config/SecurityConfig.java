@@ -3,6 +3,7 @@ package com.tof.tracesoffamily.config;
 import com.tof.tracesoffamily.security.CustomUserDetailsService;
 import com.tof.tracesoffamily.security.JwtTokenFilter;
 import com.tof.tracesoffamily.security.RestAuthenticationEntryPoint;
+import com.tof.tracesoffamily.security.TokenAuthenticationFilter;
 import com.tof.tracesoffamily.security.oauth2.CustomOAuth2UserService;
 import com.tof.tracesoffamily.security.oauth2.HttpCookieOAuth2AuthorizationRequestRepository;
 import com.tof.tracesoffamily.security.oauth2.OAuth2AuthenticationFailureHandler;
@@ -42,6 +43,7 @@ public class SecurityConfig {
     private String secretKey;
 
 
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception{
         return httpSecurity
@@ -60,14 +62,18 @@ public class SecurityConfig {
                         "/**/*.html",
                         "/**/*.css",
                         "/**/*.js")
-                .permitAll() // join, login은 언제나 가능
+                .permitAll()
                 .requestMatchers(
                         "/auth/**", "/oauth2/**"
 //                        , "/api/mission/**", "/api/post/**"
                 )
                 .permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/**").authenticated() // api/** 모두 검증해야함
+                .anyRequest()
+                .authenticated()
                 .and()
+//                .permitAll()
+//                .requestMatchers(HttpMethod.POST, "/api/**").authenticated() // api/** 모두 검증해야함
+//                .and()
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // jwt사용하는 경우 씀
                 .and()
@@ -85,16 +91,15 @@ public class SecurityConfig {
                 .successHandler(oAuth2AuthenticationSuccessHandler)
                 .failureHandler(oAuth2AuthenticationFailureHandler)
                 .and()
-                .addFilterBefore(new JwtTokenFilter(secretKey, userService), UsernamePasswordAuthenticationFilter.class) //UserNamePasswordAuthenticationFilter적용하기 전에 JWTTokenFilter를 적용 하라는 뜻 입니다.
+                .addFilterBefore(tokenAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class) //UserNamePasswordAuthenticationFilter적용하기 전에 JWTTokenFilter를 적용 하라는 뜻 입니다.
                 .build();
     }
 
-//    @Bean
-//    public void configure(AuthenticationManagerBuilder authenticationManagerBuilder) throws Exception {
-//        authenticationManagerBuilder
-//                .userDetailsService(customUserDetailsService)
-//                .passwordEncoder(passwordEncoder());
-//    }
+    @Bean
+    public TokenAuthenticationFilter tokenAuthenticationFilter() {
+        return new TokenAuthenticationFilter();
+    }
+
     @Autowired
     public void configure(AuthenticationManagerBuilder authenticationManagerBuilder) throws Exception {
         authenticationManagerBuilder
